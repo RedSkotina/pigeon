@@ -98,12 +98,13 @@ PrefixedExpr ← op:PrefixedOp __ expr:SuffixedExpr {
         and.Expr = expr.(ast.Expression)
         return and, nil
     }
+
     not := ast.NewNotExpr(pos)
     not.Expr = expr.(ast.Expression)
     return not, nil
 } / SuffixedExpr
 
-PrefixedOp ← ( '&' / '!' ) {
+PrefixedOp ← ( '&' / '!'  ) {
     return string(c.text), nil
 }
 
@@ -146,12 +147,17 @@ SemanticPredExpr ← op:SemanticPredOp __ code:CodeBlock {
         and := ast.NewAndCodeExpr(c.astPos())
         and.Code = code.(*ast.CodeBlock)
         return and, nil
+    } else if opStr == "#" {
+        state := ast.NewStateCodeExpr(c.astPos())
+        state.Code = code.(*ast.CodeBlock)
+        return state, nil
     }
+    
     not := ast.NewNotCodeExpr(c.astPos())
     not.Code = code.(*ast.CodeBlock)
     return not, nil
 }
-SemanticPredOp ← ( '&' / '!' ) {
+SemanticPredOp ← ( '#' / '&' / '!' ) {
     return string(c.text), nil
 }
 

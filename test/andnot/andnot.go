@@ -43,24 +43,24 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Input",
-			pos:  position{line: 30, col: 1, offset: 428},
+			pos:  position{line: 28, col: 1, offset: 406},
 			expr: &seqExpr{
-				pos: position{line: 30, col: 9, offset: 438},
+				pos: position{line: 28, col: 9, offset: 416},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 30, col: 9, offset: 438},
+						pos:  position{line: 28, col: 9, offset: 416},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 30, col: 11, offset: 440},
+						pos:  position{line: 28, col: 11, offset: 418},
 						name: "AB",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 30, col: 14, offset: 443},
+						pos:  position{line: 28, col: 14, offset: 421},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 30, col: 16, offset: 445},
+						pos:  position{line: 28, col: 16, offset: 423},
 						name: "EOF",
 					},
 				},
@@ -68,20 +68,20 @@ var g = &grammar{
 		},
 		{
 			name: "AB",
-			pos:  position{line: 32, col: 1, offset: 450},
+			pos:  position{line: 30, col: 1, offset: 428},
 			expr: &choiceExpr{
-				pos: position{line: 32, col: 6, offset: 457},
+				pos: position{line: 30, col: 6, offset: 435},
 				alternatives: []interface{}{
 					&seqExpr{
-						pos: position{line: 32, col: 6, offset: 457},
+						pos: position{line: 30, col: 6, offset: 435},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 32, col: 6, offset: 457},
+								pos:   position{line: 30, col: 6, offset: 435},
 								label: "abees",
 								expr: &oneOrMoreExpr{
-									pos: position{line: 32, col: 12, offset: 463},
+									pos: position{line: 30, col: 12, offset: 441},
 									expr: &charClassMatcher{
-										pos:        position{line: 32, col: 12, offset: 463},
+										pos:        position{line: 30, col: 12, offset: 441},
 										val:        "[ab]",
 										chars:      []rune{'a', 'b'},
 										ignoreCase: false,
@@ -90,13 +90,13 @@ var g = &grammar{
 								},
 							},
 							&andCodeExpr{
-								pos: position{line: 32, col: 18, offset: 469},
+								pos: position{line: 30, col: 18, offset: 447},
 								run: (*parser).callonAB6,
 							},
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 77, offset: 528},
+						pos:  position{line: 30, col: 77, offset: 506},
 						name: "CD",
 					},
 				},
@@ -104,17 +104,17 @@ var g = &grammar{
 		},
 		{
 			name: "CD",
-			pos:  position{line: 33, col: 1, offset: 531},
+			pos:  position{line: 31, col: 1, offset: 509},
 			expr: &seqExpr{
-				pos: position{line: 33, col: 6, offset: 538},
+				pos: position{line: 31, col: 6, offset: 516},
 				exprs: []interface{}{
 					&labeledExpr{
-						pos:   position{line: 33, col: 6, offset: 538},
+						pos:   position{line: 31, col: 6, offset: 516},
 						label: "ceedees",
 						expr: &oneOrMoreExpr{
-							pos: position{line: 33, col: 14, offset: 546},
+							pos: position{line: 31, col: 14, offset: 524},
 							expr: &charClassMatcher{
-								pos:        position{line: 33, col: 14, offset: 546},
+								pos:        position{line: 31, col: 14, offset: 524},
 								val:        "[cd]",
 								chars:      []rune{'c', 'd'},
 								ignoreCase: false,
@@ -123,7 +123,7 @@ var g = &grammar{
 						},
 					},
 					&notCodeExpr{
-						pos: position{line: 33, col: 20, offset: 552},
+						pos: position{line: 31, col: 20, offset: 530},
 						run: (*parser).callonCD5,
 					},
 				},
@@ -131,11 +131,11 @@ var g = &grammar{
 		},
 		{
 			name: "_",
-			pos:  position{line: 35, col: 1, offset: 612},
+			pos:  position{line: 33, col: 1, offset: 590},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 35, col: 5, offset: 618},
+				pos: position{line: 33, col: 5, offset: 596},
 				expr: &charClassMatcher{
-					pos:        position{line: 35, col: 5, offset: 618},
+					pos:        position{line: 33, col: 5, offset: 596},
 					val:        "[ \\t\\n\\r]",
 					chars:      []rune{' ', '\t', '\n', '\r'},
 					ignoreCase: false,
@@ -145,11 +145,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 36, col: 1, offset: 629},
+			pos:  position{line: 34, col: 1, offset: 607},
 			expr: &notExpr{
-				pos: position{line: 36, col: 7, offset: 637},
+				pos: position{line: 34, col: 7, offset: 615},
 				expr: &anyMatcher{
-					line: 36, col: 8, offset: 638,
+					line: 34, col: 8, offset: 616,
 				},
 			},
 		},
@@ -183,6 +183,9 @@ var (
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
+
+	// State
+	state = make(statedict)
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -283,8 +286,9 @@ func (p position) String() string {
 // parser.
 type savepoint struct {
 	position
-	rn rune
-	w  int
+	rn    rune
+	w     int
+	state statedict
 }
 
 type current struct {
@@ -294,6 +298,8 @@ type current struct {
 	// the globalStore allows the parser to store arbitrary values
 	globalStore map[string]interface{}
 }
+
+type statedict map[string]interface{}
 
 // the AST types...
 
@@ -353,6 +359,11 @@ type andCodeExpr struct {
 }
 
 type notCodeExpr struct {
+	pos position
+	run func(*parser) (bool, error)
+}
+
+type stateCodeExpr struct {
 	pos position
 	run func(*parser) (bool, error)
 }
@@ -442,7 +453,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		filename: filename,
 		errs:     new(errList),
 		data:     b,
-		pt:       savepoint{position: position{line: 1}},
+		pt:       savepoint{position: position{line: 1}, state: make(statedict)},
 		recover:  true,
 		cur: current{
 			globalStore: make(map[string]interface{}),
@@ -618,6 +629,13 @@ func (p *parser) read() {
 	}
 }
 
+// copy state
+func copyState(dst, src statedict) {
+	for k, v := range src {
+		dst[k] = v
+	}
+}
+
 // restore parser position to the savepoint pt.
 func (p *parser) restore(pt savepoint) {
 	if p.debug {
@@ -748,7 +766,6 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 			return res.v, res.b
 		}
 	}
-
 	start := p.pt
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
@@ -807,6 +824,8 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		val, ok = p.parseRuleRefExpr(expr)
 	case *seqExpr:
 		val, ok = p.parseSeqExpr(expr)
+	case *stateCodeExpr:
+		val, ok = p.parseStateCodeExpr(expr)
 	case *zeroOrMoreExpr:
 		val, ok = p.parseZeroOrMoreExpr(expr)
 	case *zeroOrOneExpr:
@@ -860,10 +879,14 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	pt.state = make(statedict)
+	copyState(pt.state, p.pt.state)
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
+	copyState(p.pt.state, pt.state)
+	copyState(state, pt.state)
 	return nil, ok
 }
 
@@ -1018,18 +1041,34 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 	return nil, !ok
 }
 
+func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
+	if p.debug {
+		defer p.out(p.in("parseStateCodeExpr"))
+	}
+
+	_, err := state.run(p)
+	if err != nil {
+		p.addErr(err)
+	}
+	return nil, true
+}
+
 func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
 	}
 
 	pt := p.pt
+	pt.state = make(statedict)
+	copyState(pt.state, p.pt.state)
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
+	copyState(p.pt.state, pt.state)
+	copyState(state, pt.state)
 	return nil, !ok
 }
 
@@ -1080,10 +1119,14 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	pt.state = make(statedict)
+	copyState(pt.state, p.pt.state)
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			copyState(p.pt.state, pt.state)
+			copyState(state, pt.state)
 			return nil, false
 		}
 		vals = append(vals, val)

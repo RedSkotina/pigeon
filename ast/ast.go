@@ -348,6 +348,27 @@ func (n *NotCodeExpr) String() string {
 	return fmt.Sprintf("%s: %T{Code: %v}", n.p, n, n.Code)
 }
 
+// StateCodeExpr is an expression that can modify global State map variable
+type StateCodeExpr struct {
+	p      Pos
+	Code   *CodeBlock
+	FuncIx int
+}
+
+// NewStateCodeExpr creates a new state code expression at the specified
+// position.
+func NewStateCodeExpr(p Pos) *StateCodeExpr {
+	return &StateCodeExpr{p: p}
+}
+
+// Pos returns the starting position of the node.
+func (n *StateCodeExpr) Pos() Pos { return n.p }
+
+// String returns the textual representation of a node.
+func (n *StateCodeExpr) String() string {
+	return fmt.Sprintf("%s: %T{Code: %v}", n.p, n, n.Code)
+}
+
 // LitMatcher is a string literal matcher. The value to match may be a
 // double-quoted string, a single-quoted single character, or a back-tick
 // quoted raw string.

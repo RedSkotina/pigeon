@@ -161,6 +161,8 @@ func (b *builder) writeExpr(expr ast.Expression) {
 		b.writeRuleRefExpr(expr)
 	case *ast.SeqExpr:
 		b.writeSeqExpr(expr)
+	case *ast.StateCodeExpr:
+		b.writeStateCodeExpr(expr)
 	case *ast.ZeroOrMoreExpr:
 		b.writeZeroOrMoreExpr(expr)
 	case *ast.ZeroOrOneExpr:
@@ -387,6 +389,19 @@ func (b *builder) writeSeqExpr(seq *ast.SeqExpr) {
 	b.writelnf("},")
 }
 
+func (b *builder) writeStateCodeExpr(not *ast.StateCodeExpr) {
+	if not == nil {
+		b.writelnf("nil,")
+		return
+	}
+	b.writelnf("&stateCodeExpr{")
+	pos := not.Pos()
+	not.FuncIx = b.exprIndex
+	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
+	b.writelnf("\trun: (*parser).call%s,", b.funcName(not.FuncIx))
+	b.writelnf("},")
+}
+
 func (b *builder) writeZeroOrMoreExpr(zero *ast.ZeroOrMoreExpr) {
 	if zero == nil {
 		b.writelnf("nil,")
@@ -460,6 +475,9 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 	case *ast.NotCodeExpr:
 		b.writeNotCodeExprCode(expr)
 
+	case *ast.StateCodeExpr:
+		b.writeStateCodeExprCode(expr)
+
 	case *ast.AndExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
@@ -513,7 +531,12 @@ func (b *builder) writeNotCodeExprCode(not *ast.NotCodeExpr) {
 	}
 	b.writeFunc(not.FuncIx, not.Code, callPredFuncTemplate, onPredFuncTemplate)
 }
-
+func (b *builder) writeStateCodeExprCode(state *ast.StateCodeExpr) {
+	if state == nil {
+		return
+	}
+	b.writeFunc(state.FuncIx, state.Code, callPredFuncTemplate, onPredFuncTemplate)
+}
 func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl string) {
 	if code == nil {
 		return

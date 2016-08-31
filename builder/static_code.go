@@ -103,6 +103,7 @@ type savepoint struct {
 	position
 	rn rune
 	w  int
+	state map[string]interface{}
 }
 
 type current struct {
@@ -168,6 +169,11 @@ type andCodeExpr struct {
 }
 
 type notCodeExpr struct {
+	pos position
+	run func(*parser) (bool, error)
+}
+
+type stateCodeExpr struct {
 	pos position
 	run func(*parser) (bool, error)
 }
@@ -255,7 +261,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		filename: filename,
 		errs: new(errList),
 		data: b,
-		pt: savepoint{position: position{line: 1}},
+		pt: savepoint{position: position{line: 1}, state: make(map[string]interface{})},
 		recover: true,
 	}
 	p.setOptions(opts)
@@ -403,7 +409,7 @@ func (p *parser) read() {
 }
 
 // copy state
-func copyState()(dst,src map[string]interface{} ) {
+func copyState(dst,src map[string]interface{} ) {
 	for k,v := range src {
   		dst[k] = v
 	}
@@ -768,7 +774,7 @@ func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
 		defer p.out(p.in("parseStateCodeExpr"))
 	}
 
-	ok, err := state.run(p)
+	_, err := state.run(p)
 	if err != nil {
 		p.addErr(err)
 	}

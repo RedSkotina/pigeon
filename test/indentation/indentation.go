@@ -462,17 +462,17 @@ var g = &grammar{
 		},
 		{
 			name: "INDENT",
-			pos:  position{line: 56, col: 1, offset: 1348},
+			pos:  position{line: 56, col: 1, offset: 1416},
 			expr: &stateCodeExpr{
-				pos: position{line: 56, col: 10, offset: 1359},
+				pos: position{line: 56, col: 10, offset: 1427},
 				run: (*parser).callonINDENT1,
 			},
 		},
 		{
 			name: "DEDENT",
-			pos:  position{line: 58, col: 1, offset: 1433},
+			pos:  position{line: 58, col: 1, offset: 1523},
 			expr: &stateCodeExpr{
-				pos: position{line: 58, col: 10, offset: 1444},
+				pos: position{line: 58, col: 10, offset: 1534},
 				run: (*parser).callonDEDENT1,
 			},
 		},
@@ -564,7 +564,8 @@ func (p *parser) callonName1() (interface{}, error) {
 }
 
 func (c *current) onINDENTATION5(spaces interface{}) (bool, error) {
-	return len(toString(spaces)) == state["Indentation"], nil
+	fmt.Println(len(toString(spaces)), state["Indentation"].(int))
+	return len(toString(spaces)) == state["Indentation"].(int), nil
 }
 
 func (p *parser) callonINDENTATION5() (bool, error) {
@@ -575,6 +576,7 @@ func (p *parser) callonINDENTATION5() (bool, error) {
 
 /*c*/
 func (state statedict) onINDENT1() error {
+	fmt.Println("indent")
 	state["Indentation"] = state["Indentation"].(int) + 4
 	return nil
 }
@@ -589,6 +591,7 @@ func (p *parser) callonINDENT1() (bool, error) {
 
 /*c*/
 func (state statedict) onDEDENT1() error {
+	fmt.Println("dedent")
 	state["Indentation"] = state["Indentation"].(int) - 4
 	return nil
 }

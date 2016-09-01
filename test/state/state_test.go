@@ -8,7 +8,7 @@ var cases = map[string]int{
 
 func TestState(t *testing.T) {
 	for tc, exp := range cases {
-		got, err := Parse("", []byte(tc), Debug(true))
+		got, err := Parse("", []byte(tc), Memoize(true))
 		
 		if err != nil {
 			t.Errorf(err.Error())

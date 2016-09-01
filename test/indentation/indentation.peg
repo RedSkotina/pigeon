@@ -51,9 +51,9 @@ Comment ← "//" [^\r\n]*
 
 EOF ← !.
 
-INDENTATION ← spaces:" "* &{ return len(toString(spaces)) == state["Indentation"], nil }
+INDENTATION ← spaces:" "* &{fmt.Println(len(toString(spaces)),state["Indentation"].(int)); return len(toString(spaces)) == state["Indentation"].(int), nil }
 
-INDENT ← #{ state["Indentation"] = state["Indentation"].(int) + 4; return nil }
+INDENT ← #{ fmt.Println("indent");state["Indentation"] = state["Indentation"].(int) + 4; return nil }
 
-DEDENT ← #{ state["Indentation"] = state["Indentation"].(int) - 4; return nil }
+DEDENT ← #{ fmt.Println("dedent");state["Indentation"] = state["Indentation"].(int) - 4; return nil }
 

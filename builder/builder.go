@@ -23,6 +23,11 @@ var (
 %s
 }
 `
+	onStateFuncTemplate = `/*%s*/
+func (state statedict) %s(%s) (error) {
+%s
+}
+`
 	callFuncTemplate = `func (p *parser) call%s() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
@@ -33,6 +38,15 @@ var (
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.%[1]s(%s)
+}
+`
+
+	callStateFuncTemplate = `func (p *parser) call%s() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	err := p.pt.state.%[1]s(%s)
+	copyState(state, p.pt.state)
+	return true, err
 }
 `
 )
@@ -535,7 +549,7 @@ func (b *builder) writeStateCodeExprCode(state *ast.StateCodeExpr) {
 	if state == nil {
 		return
 	}
-	b.writeFunc(state.FuncIx, state.Code, callPredFuncTemplate, onPredFuncTemplate)
+	b.writeFunc(state.FuncIx, state.Code, callStateFuncTemplate, onStateFuncTemplate)
 }
 func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl string) {
 	if code == nil {

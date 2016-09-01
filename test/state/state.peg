@@ -11,49 +11,19 @@ func main() {
 		defer f.Close()
 		in = f
 	}
-	got, err := ParseReader("", in)
+	got, err := ParseReader("", in, Debug(true))
 	fmt.Println(got, err)
 }
 
-func toString(v interface{}) string {
-    ifSl := v.([]interface{})
-    var res string
-    for _, s := range ifSl {
-        res += string(s.([]byte))
-    }
-    return res
+
 }
 
-type Triple struct {
-    ttype, name, expr interface{}
-}
-}
+start = #{fmt.Println("start");state["countCs"] = 0;return nil} ((x/y) ws*)* { fmt.Println(state["countCs"]); return state["countCs"],nil }
 
+x = "ab" c "d"
+y = "a" bc "e"
 
+c = "c" #{ fmt.Println("c");state["countCs"] = state["countCs"].(int)+1; return nil }
+bc = "bc" #{ fmt.Println("bc");state["countCs"] = state["countCs"].(int)+1; return nil}
 
-Input ← #{ State["Indentation"] = 0; return true,nil } s:Statements EOF { return s,nil }
-Statements ← Line+
-
-Line ← INDENTATION s:Statement { return s,nil }
-
-Statement ← s:SimpleStatement EOL { return s,nil }
-  / "if" _ n:Name _? ":" EOL INDENT s:Statements DEDENT { return Triple{ttype : "condition", name : n, expr : s },nil }
-  / "def" _ n:Name _? ":" EOL INDENT s:Statements DEDENT { return Triple{ttype : "def", name : n, expr : s },nil }
-
-SimpleStatement ← a:Name _? "=" _? b:Name { return Triple{ttype : "assignment", name : a, expr : b },nil }
-
-Name ← n:([a-zA-Z] [a-zA-Z0-9]*) { return string(c.text),nil }
-
-_ ← [ \t]+
-
-EOL ← _? Comment? ("\r\n" / "\n\r" / "\r" / "\n" / EOF)
-
-Comment ← "//" [^\r\n]*
-
-EOF ← !.
-
-INDENTATION ← spaces:" "* &{ return len(toString(spaces)) == State["Indentation"], nil }
-
-INDENT ← #{ State["Indentation"] = State["Indentation"].(int) + 4; return true,nil }
-
-DEDENT ← #{ State["Indentation"] = State["Indentation"].(int) - 4; return true,nil }
+ws = " " / "\n"

@@ -118,7 +118,7 @@ var (
 	errNoMatch = errors.New("no match found")
 
 	// State
-	State = make(map[string]interface{})
+	state = make(statedict)
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -207,13 +207,15 @@ type savepoint struct {
 	position
 	rn    rune
 	w     int
-	state map[string]interface{}
+	state statedict
 }
 
 type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 }
+
+type statedict map[string]interface{}
 
 // the AST types...
 
@@ -365,7 +367,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		filename: filename,
 		errs:     new(errList),
 		data:     b,
-		pt:       savepoint{position: position{line: 1}, state: make(map[string]interface{})},
+		pt:       savepoint{position: position{line: 1}, state: make(statedict)},
 		recover:  true,
 	}
 	p.setOptions(opts)
@@ -513,7 +515,7 @@ func (p *parser) read() {
 }
 
 // copy state
-func copyState(dst, src map[string]interface{}) {
+func copyState(dst, src statedict) {
 	for k, v := range src {
 		dst[k] = v
 	}
@@ -528,7 +530,6 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
-	copyState(State, pt.state)
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -621,7 +622,6 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 			return res.v, res.b
 		}
 	}
-
 	start := p.pt
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
@@ -945,10 +945,13 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	var vals []interface{}
 
 	pt := p.pt
+	pt.state = make(statedict)
+	copyState(pt.state, p.pt.state)
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			copyState(p.pt.state, pt.state)
 			return nil, false
 		}
 		vals = append(vals, val)

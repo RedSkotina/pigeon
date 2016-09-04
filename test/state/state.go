@@ -31,39 +31,39 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "start",
-			pos:  position{line: 21, col: 1, offset: 267},
+			pos:  position{line: 20, col: 1, offset: 265},
 			expr: &actionExpr{
-				pos: position{line: 21, col: 9, offset: 275},
+				pos: position{line: 20, col: 9, offset: 273},
 				run: (*parser).callonstart1,
 				expr: &seqExpr{
-					pos: position{line: 21, col: 9, offset: 275},
+					pos: position{line: 20, col: 9, offset: 273},
 					exprs: []interface{}{
 						&stateCodeExpr{
-							pos: position{line: 21, col: 9, offset: 275},
+							pos: position{line: 20, col: 9, offset: 273},
 							run: (*parser).callonstart3,
 						},
 						&zeroOrMoreExpr{
-							pos: position{line: 21, col: 65, offset: 331},
+							pos: position{line: 20, col: 45, offset: 309},
 							expr: &seqExpr{
-								pos: position{line: 21, col: 66, offset: 332},
+								pos: position{line: 20, col: 46, offset: 310},
 								exprs: []interface{}{
 									&choiceExpr{
-										pos: position{line: 21, col: 67, offset: 333},
+										pos: position{line: 20, col: 47, offset: 311},
 										alternatives: []interface{}{
 											&ruleRefExpr{
-												pos:  position{line: 21, col: 67, offset: 333},
+												pos:  position{line: 20, col: 47, offset: 311},
 												name: "x",
 											},
 											&ruleRefExpr{
-												pos:  position{line: 21, col: 69, offset: 335},
+												pos:  position{line: 20, col: 49, offset: 313},
 												name: "y",
 											},
 										},
 									},
 									&zeroOrMoreExpr{
-										pos: position{line: 21, col: 72, offset: 338},
+										pos: position{line: 20, col: 52, offset: 316},
 										expr: &ruleRefExpr{
-											pos:  position{line: 21, col: 72, offset: 338},
+											pos:  position{line: 20, col: 52, offset: 316},
 											name: "ws",
 										},
 									},
@@ -76,21 +76,21 @@ var g = &grammar{
 		},
 		{
 			name: "x",
-			pos:  position{line: 23, col: 1, offset: 410},
+			pos:  position{line: 22, col: 1, offset: 357},
 			expr: &seqExpr{
-				pos: position{line: 23, col: 5, offset: 414},
+				pos: position{line: 22, col: 5, offset: 361},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 23, col: 5, offset: 414},
+						pos:        position{line: 22, col: 5, offset: 361},
 						val:        "ab",
 						ignoreCase: false,
 					},
 					&ruleRefExpr{
-						pos:  position{line: 23, col: 10, offset: 419},
+						pos:  position{line: 22, col: 10, offset: 366},
 						name: "c",
 					},
 					&litMatcher{
-						pos:        position{line: 23, col: 12, offset: 421},
+						pos:        position{line: 22, col: 12, offset: 368},
 						val:        "d",
 						ignoreCase: false,
 					},
@@ -99,21 +99,21 @@ var g = &grammar{
 		},
 		{
 			name: "y",
-			pos:  position{line: 24, col: 1, offset: 426},
+			pos:  position{line: 23, col: 1, offset: 373},
 			expr: &seqExpr{
-				pos: position{line: 24, col: 5, offset: 430},
+				pos: position{line: 23, col: 5, offset: 377},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 24, col: 5, offset: 430},
+						pos:        position{line: 23, col: 5, offset: 377},
 						val:        "a",
 						ignoreCase: false,
 					},
 					&ruleRefExpr{
-						pos:  position{line: 24, col: 9, offset: 434},
+						pos:  position{line: 23, col: 9, offset: 381},
 						name: "bc",
 					},
 					&litMatcher{
-						pos:        position{line: 24, col: 12, offset: 437},
+						pos:        position{line: 23, col: 12, offset: 384},
 						val:        "e",
 						ignoreCase: false,
 					},
@@ -122,17 +122,17 @@ var g = &grammar{
 		},
 		{
 			name: "c",
-			pos:  position{line: 26, col: 1, offset: 444},
+			pos:  position{line: 25, col: 1, offset: 391},
 			expr: &seqExpr{
-				pos: position{line: 26, col: 5, offset: 448},
+				pos: position{line: 25, col: 5, offset: 395},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 26, col: 5, offset: 448},
+						pos:        position{line: 25, col: 5, offset: 395},
 						val:        "c",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 26, col: 9, offset: 452},
+						pos: position{line: 25, col: 9, offset: 399},
 						run: (*parser).callonc3,
 					},
 				},
@@ -140,17 +140,17 @@ var g = &grammar{
 		},
 		{
 			name: "bc",
-			pos:  position{line: 27, col: 1, offset: 531},
+			pos:  position{line: 26, col: 1, offset: 461},
 			expr: &seqExpr{
-				pos: position{line: 27, col: 6, offset: 536},
+				pos: position{line: 26, col: 6, offset: 466},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 27, col: 6, offset: 536},
+						pos:        position{line: 26, col: 6, offset: 466},
 						val:        "bc",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 27, col: 11, offset: 541},
+						pos: position{line: 26, col: 11, offset: 471},
 						run: (*parser).callonbc3,
 					},
 				},
@@ -158,17 +158,17 @@ var g = &grammar{
 		},
 		{
 			name: "ws",
-			pos:  position{line: 29, col: 1, offset: 622},
+			pos:  position{line: 28, col: 1, offset: 534},
 			expr: &choiceExpr{
-				pos: position{line: 29, col: 6, offset: 627},
+				pos: position{line: 28, col: 6, offset: 539},
 				alternatives: []interface{}{
 					&litMatcher{
-						pos:        position{line: 29, col: 6, offset: 627},
+						pos:        position{line: 28, col: 6, offset: 539},
 						val:        " ",
 						ignoreCase: false,
 					},
 					&litMatcher{
-						pos:        position{line: 29, col: 12, offset: 633},
+						pos:        position{line: 28, col: 12, offset: 545},
 						val:        "\n",
 						ignoreCase: false,
 					},
@@ -180,7 +180,6 @@ var g = &grammar{
 
 /*c*/
 func (state statedict) onstart3() error {
-	fmt.Println("start")
 	state["countCs"] = 0
 	return nil
 }
@@ -194,7 +193,6 @@ func (p *parser) callonstart3() (bool, error) {
 }
 
 func (c *current) onstart1() (interface{}, error) {
-	fmt.Println(state["countCs"])
 	return state["countCs"], nil
 }
 
@@ -206,7 +204,6 @@ func (p *parser) callonstart1() (interface{}, error) {
 
 /*c*/
 func (state statedict) onc3() error {
-	fmt.Println("c")
 	state["countCs"] = state["countCs"].(int) + 3
 	return nil
 }
@@ -221,7 +218,6 @@ func (p *parser) callonc3() (bool, error) {
 
 /*c*/
 func (state statedict) onbc3() error {
-	fmt.Println("bc")
 	state["countCs"] = state["countCs"].(int) + 1
 	return nil
 }
@@ -636,7 +632,7 @@ func (p *parser) read() {
 	}
 
 	if rn == utf8.RuneError {
-		if n > 0 {
+		if n == 1 {
 			p.addErr(errInvalidEncoding)
 		}
 	}
@@ -863,10 +859,13 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	pt.state = make(statedict)
+	copyState(pt.state, p.pt.state)
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
+	copyState(p.pt.state, pt.state)
 	return nil, ok
 }
 
@@ -1019,10 +1018,13 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	pt.state = make(statedict)
+	copyState(pt.state, p.pt.state)
 	p.pushV()
 	_, ok := p.parseExpr(not.expr)
 	p.popV()
 	p.restore(pt)
+	copyState(p.pt.state, pt.state)
 	return nil, !ok
 }
 

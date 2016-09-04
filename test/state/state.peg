@@ -15,15 +15,14 @@ func main() {
 	fmt.Println(got, err)
 }
 
-
 }
 
-start = #{fmt.Println("start");state["countCs"] = 0;return nil} ((x/y) ws*)* { fmt.Println(state["countCs"]); return state["countCs"],nil }
+start = #{ state["countCs"] = 0;return nil} ((x/y) ws*)* { return state["countCs"],nil }
 
 x = "ab" c "d"
 y = "a" bc "e"
 
-c = "c" #{ fmt.Println("c");state["countCs"] = state["countCs"].(int)+3; return nil }
-bc = "bc" #{ fmt.Println("bc");state["countCs"] = state["countCs"].(int)+1; return nil}
+c = "c" #{ state["countCs"] = state["countCs"].(int)+3; return nil }
+bc = "bc" #{ state["countCs"] = state["countCs"].(int)+1; return nil}
 
 ws = " " / "\n"

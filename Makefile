@@ -61,6 +61,9 @@ $(EXAMPLES_DIR)/json/json.go: $(EXAMPLES_DIR)/json/json.peg $(BINDIR)/pigeon
 $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
+$(EXAMPLES_DIR)/indentation/indentation.go: $(EXAMPLES_DIR)/indentation/indentation.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< | goimports > $@
+
 $(TEST_DIR)/andnot/andnot.go: $(TEST_DIR)/andnot/andnot.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
@@ -76,8 +79,9 @@ $(TEST_DIR)/linear/linear.go: $(TEST_DIR)/linear/linear.peg $(BINDIR)/pigeon
 $(TEST_DIR)/issue_12/issue_12.go: $(TEST_DIR)/issue_12/issue_12.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
-$(TEST_DIR)/memoize/memoize.go: $(TEST_DIR)/memoize/memoize.peg $(BINDIR)/pigeon
+$(TEST_DIR)/state/state.go: $(TEST_DIR)/state/state.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
+
     
 lint:
 	golint ./...

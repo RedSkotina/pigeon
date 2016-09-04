@@ -4,6 +4,7 @@ import "testing"
 
 var cases = map[string]int{
 	"abce":         1,
+    "abcd":         3,
 }
 
 func TestState(t *testing.T) {

@@ -809,6 +809,7 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	p.popV()
 	p.restore(pt)
 	copyState(p.pt.state, pt.state)
+	copyState(state, pt.state)
 	return nil, ok
 }
 
@@ -968,6 +969,7 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	p.popV()
 	p.restore(pt)
 	copyState(p.pt.state, pt.state)
+	copyState(state, pt.state)
 	return nil, !ok
 }
 
@@ -1025,6 +1027,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 		if !ok {
 			p.restore(pt)
 			copyState(p.pt.state, pt.state)
+			copyState(state, pt.state)
 			return nil, false
 		}
 		vals = append(vals, val)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -201,6 +202,18 @@ func Debug(b bool) Option {
 		old := p.debug
 		p.debug = b
 		return Debug(old)
+	}
+}
+
+// JDebug creates an Option to set the jdebug flag to b. When set to true,
+// debugging information is printed to stdout  as JSON after parsing.
+//
+// The default is false.
+func JDebug(b bool) Option {
+	return func(p *parser) Option {
+		old := p.jdebug
+		p.jdebug = b
+		return JDebug(old)
 	}
 }
 
@@ -436,6 +449,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		data:     b,
 		pt:       savepoint{position: position{line: 1}, state: make(statedict)},
 		recover:  true,
+		trace:    TTrace{},
 	}
 	p.setOptions(opts)
 	return p
@@ -446,6 +460,26 @@ func (p *parser) setOptions(opts []Option) {
 	for _, opt := range opts {
 		opt(p)
 	}
+}
+
+// TDetail group information
+type TDetail struct {
+	Idx1 int    `json:"idx1"`
+	Idx2 int    `json:"idx2"`
+	Name string `json:"name"`
+}
+
+// TEntry element of trace
+type TEntry struct {
+	Detail  TDetail  `json:"detail"`
+	Calls   []TEntry `json:"calls"`
+	IsMatch bool     `json:"ismatch"`
+}
+
+// TTrace root of entries
+type TTrace struct {
+	Entries []TEntry `json:"entries"`
+	Errors  string   `json:"errors"`
 }
 
 type resultTuple struct {
@@ -464,6 +498,7 @@ type parser struct {
 
 	recover bool
 	debug   bool
+	jdebug  bool
 	depth   int
 
 	memoize bool
@@ -480,6 +515,9 @@ type parser struct {
 
 	// stats
 	exprCnt int
+	// trace calls of rules, if jdebug is true, else nil
+	trace  TTrace
+	tstack []*TEntry
 }
 
 // push a variable set on the vstack.
@@ -514,6 +552,41 @@ func (p *parser) popV() {
 	p.vstack = p.vstack[:len(p.vstack)-1]
 }
 
+// push a trace entry on the tstack.
+func (p *parser) pushT(e *TEntry) {
+	if cap(p.tstack) == len(p.tstack) {
+		// create new empty slot in the stack
+		p.tstack = append(p.tstack, nil)
+	} else {
+		// slice to 1 more
+		p.tstack = p.tstack[:len(p.tstack)+1]
+	}
+
+	// get the last args set
+	v := p.tstack[len(p.tstack)-1]
+	if v != nil {
+		return
+	}
+	p.tstack[len(p.tstack)-1] = e
+}
+
+// pop a trace entry from the tstack.
+func (p *parser) popT() *TEntry {
+	if len(p.tstack) == 0 {
+		return nil
+	}
+	e := p.tstack[len(p.tstack)-1]
+	p.tstack = p.tstack[:len(p.tstack)-1]
+	return e
+}
+
+func (p *parser) peekT() *TEntry {
+	if len(p.tstack) == 0 {
+		return nil
+	}
+	return p.tstack[len(p.tstack)-1]
+}
+
 func (p *parser) print(prefix, s string) string {
 	if !p.debug {
 		return s
@@ -532,6 +605,28 @@ func (p *parser) in(s string) string {
 func (p *parser) out(s string) string {
 	p.depth--
 	return p.print(strings.Repeat(" ", p.depth)+"<", s)
+}
+
+func (p *parser) jin(s string) *TEntry {
+	if p.jdebug {
+		pr := p.peekT()
+		e := TEntry{Calls: []TEntry{}}
+		e.Detail = TDetail{Idx1: p.pt.offset, Name: s}
+		pr.Calls = append(pr.Calls, e)
+		w := &(pr.Calls[len(pr.Calls)-1])
+		p.pushT(w)
+		return w
+	}
+	return nil
+}
+
+func (p *parser) jout(e *TEntry) *TEntry {
+	if p.jdebug {
+		e := p.popT()
+		e.Detail.Idx2 = p.pt.offset
+		return e
+	}
+	return nil
 }
 
 func (p *parser) addErr(err error) {
@@ -640,7 +735,10 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		p.addErr(errNoRule)
 		return nil, p.errs.err()
 	}
-
+	if p.jdebug {
+		e := TEntry{}
+		p.pushT(&e)
+	}
 	// TODO : not super critical but this could be generated
 	p.buildRulesTable(g)
 
@@ -674,12 +772,28 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}
 		return nil, p.errs.err()
 	}
+	if p.jdebug {
+		e := p.popT()
+		p.trace.Entries = e.Calls
+		jtrace, err := json.Marshal(p.trace)
+		if err != nil {
+			fmt.Println("jdebug: Cant marshal json\n")
+		} else {
+			fmt.Println(string(jtrace))
+		}
+
+	}
 	return val, p.errs.err()
 }
 
 func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
+	}
+	var j *TEntry
+	if p.jdebug {
+		j = p.jin("parseRule " + rule.name)
+		defer p.jout(j)
 	}
 
 	if p.memoize {
@@ -697,6 +811,9 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
+	}
+	if ok && p.jdebug {
+		j.IsMatch = true
 	}
 
 	if p.memoize {
@@ -977,6 +1094,9 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
+	if p.jdebug {
+		defer p.jout(p.jin("parseOneOrMoreExpr"))
+	}
 
 	var vals []interface{}
 
@@ -1039,6 +1159,9 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
+	if p.jdebug {
+		defer p.jout(p.jin("parseZeroOrMoreExpr"))
+	}
 
 	var vals []interface{}
 
@@ -1056,6 +1179,9 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))
+	}
+	if p.jdebug {
+		defer p.jout(p.jin("parseZeroOrOneExpr"))
 	}
 
 	p.pushV()

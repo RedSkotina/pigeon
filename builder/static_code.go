@@ -382,20 +382,7 @@ func (p *parser) popV() {
 
 // push a trace entry on the tstack.
 func (p *parser) pushT(e *TEntry) {
-	if cap(p.tstack) == len(p.tstack) {
-		// create new empty slot in the stack
-		p.tstack = append(p.tstack, nil)
-	} else {
-		// slice to 1 more
-		p.tstack = p.tstack[:len(p.tstack)+1]
-	}
-
-	// get the last args set
-	v := p.tstack[len(p.tstack)-1]
-	if v != nil {
-		return
-	}
-	p.tstack[len(p.tstack)-1] = e
+	p.tstack = append(p.tstack,e)
 }
 
 // pop a trace entry from the tstack.
@@ -450,9 +437,9 @@ func (p *parser) jin(s string) *TEntry {
 
 func (p *parser) jout(e *TEntry) *TEntry {
 	if p.jdebug {
-		e := p.popT()
-		e.Detail.Idx2 = p.pt.offset
-		return e
+		p.popT()
+        e.Detail.Idx2 = p.pt.offset
+        return e
 	}
 	return nil
 }
@@ -593,13 +580,6 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	// start rule is rule [0]
 	p.read() // advance to first rune
 	val, ok := p.parseRule(g.rules[0])
-	if !ok {
-		if len(*p.errs) == 0 {
-			// make sure this doesn't go out silently
-			p.addErr(errNoMatch)
-		}
-		return nil, p.errs.err()
-	}
 	if p.jdebug {
 		e := p.popT()
 		p.trace.Entries = e.Calls
@@ -609,9 +589,15 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		} else {
 			fmt.Println(string(jtrace))
 		}
-
-
 	}
+	if !ok {
+		if len(*p.errs) == 0 {
+			// make sure this doesn't go out silently
+			p.addErr(errNoMatch)
+		}
+		return nil, p.errs.err()
+	}
+	
 	return val, p.errs.err()
 }
 
@@ -621,7 +607,7 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	}
 	var j *TEntry
 	if p.jdebug {
-		j = p.jin("parseRule " + rule.name)
+		j = p.jin("Rule " + rule.name)
 		defer p.jout(j)
 	}
 
@@ -924,7 +910,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 	if p.jdebug {
-		defer p.jout(p.jin("parseOneOrMoreExpr"))
+		defer p.jout(p.jin("OneOrMoreExpr"))
 	}
 
 	var vals []interface{}
@@ -989,7 +975,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 	if p.jdebug {
-		defer p.jout(p.jin("parseZeroOrMoreExpr"))
+		defer p.jout(p.jin("ZeroOrMoreExpr"))
 	}
 
 	var vals []interface{}
@@ -1010,7 +996,7 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
 	if p.jdebug {
-		defer p.jout(p.jin("parseZeroOrOneExpr"))
+		defer p.jout(p.jin("ZeroOrOneExpr"))
 	}
 
 	p.pushV()

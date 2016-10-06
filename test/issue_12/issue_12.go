@@ -237,6 +237,18 @@ func JDebug(b bool) Option {
 	}
 }
 
+// ShowMaxPos creates an Option to set the showMaxPos flag to b. When set to true,
+// max position is printed to stdout after parsing.
+//
+// The default is false.
+func ShowMaxPos(b bool) Option {
+	return func(p *parser) Option {
+		old := p.showMaxPos
+		p.showMaxPos = b
+		return ShowMaxPos(old)
+	}
+}
+
 // Memoize creates an Option to set the memoize flag to b. When set to true,
 // the parser will cache all results so each expression is evaluated only
 // once. This guarantees linear parsing time even for pathological cases,
@@ -532,7 +544,10 @@ type parser struct {
 	vstack []map[string]interface{}
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
-
+	// max position of parser cursor
+	maxpos position
+	// show max position
+	showMaxPos bool
 	// stats
 	exprCnt int
 	// trace calls of rules, if jdebug is true, else nil
@@ -674,6 +689,8 @@ func (p *parser) read() {
 	if rn == '\n' {
 		p.pt.line++
 		p.pt.col = 0
+		p.maxpos.line++
+		p.maxpos.col = 0
 	}
 
 	if rn == utf8.RuneError {
@@ -681,6 +698,16 @@ func (p *parser) read() {
 			p.addErr(errInvalidEncoding)
 		}
 	}
+	p.maxpos.col = max(p.maxpos.col, p.pt.col)
+	p.maxpos.offset = p.pt.offset
+}
+
+// maximum of 2 numbers
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
 }
 
 // copy state
@@ -772,6 +799,9 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	// start rule is rule [0]
 	p.read() // advance to first rune
 	val, ok := p.parseRule(g.rules[0])
+	if p.showMaxPos {
+		fmt.Printf("maxpos = [%d:%d:%d]\n", p.maxpos.line, p.maxpos.col, p.maxpos.offset)
+	}
 	if p.jdebug {
 		e := p.popT()
 		p.trace.Entries = e.Calls

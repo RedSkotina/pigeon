@@ -726,7 +726,7 @@ func (p *parser) read() {
 	if rn == '\n' {
 		p.pt.line++
 		p.pt.col = 0
-		p.maxpos.line++
+		p.maxpos.line = p.pt.line
 		p.maxpos.col = 0
 	}
 

@@ -338,7 +338,6 @@ type parser struct {
 	recover bool
 	// ==template== {{ if not .Optimize }}
 	debug bool
-	depth  int
 
 	memoize bool
 	// memoization table for the packrat algorithm:
@@ -503,7 +502,7 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
-	copyState(State,pt.state)
+	copyState(state,pt.state)
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -654,7 +653,6 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	// ==template== {{ if not .Optimize }}
 	var pt savepoint
-	var ok bool
 
 	if p.memoize {
 		res, ok := p.getMemoized(expr)
@@ -1081,19 +1079,3 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	// whether it matched or not, consider it a match
 	return val, true
 }
-
-func rangeTable(class string) *unicode.RangeTable {
-	if rt, ok := unicode.Categories[class]; ok {
-		return rt
-	}
-	if rt, ok := unicode.Properties[class]; ok {
-		return rt
-	}
-	if rt, ok := unicode.Scripts[class]; ok {
-		return rt
-	}
-
-	// cannot happen
-	panic(fmt.Sprintf("invalid Unicode class: %%s", class))
-}
-`
